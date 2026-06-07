@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CryptoMiner ERP - Passive Income with Crypto Mining</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-gray-50 flex flex-col min-h-screen">
+    <!-- Navigation -->
+    <nav class="bg-white shadow-sm border-b border-gray-100">
+        <div class="container mx-auto px-4 py-4 flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold text-blue-600 flex items-center gap-2">
+                <i class="ri-cpu-line"></i>
+                <span>CryptoMiner ERP</span>
+            </a>
+
+            <div class="hidden md:flex items-center gap-8">
+                {% if session.user_id %}
+                <a href="/dashboard" class="text-gray-600 hover:text-blue-600 font-medium">Dashboard</a>
+                <a href="/wallet" class="text-gray-600 hover:text-blue-600 font-medium">Wallet</a>
+                <a href="/miners" class="text-gray-600 hover:text-blue-600 font-medium">Miners</a>
+                <a href="/referrals" class="text-gray-600 hover:text-blue-600 font-medium">Referrals</a>
+                <div class="flex items-center gap-4 ml-4">
+                    <a href="/profile" class="w-10 h-10 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-bold">
+                        {{ session.full_name|first|upper }}
+                    </a>
+                    <a href="/logout" class="text-gray-600 hover:text-red-600"><i class="ri-logout-box-r-line text-xl"></i></a>
+                </div>
+                {% else %}
+                <a href="/" class="text-gray-600 hover:text-blue-600 font-medium">Home</a>
+                <a href="/login" class="text-gray-600 hover:text-blue-600 font-medium">Login</a>
+                <a href="/register" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-blue-700 transition">Get Started</a>
+                {% endif %}
+            </div>
+
+            <!-- Mobile menu button -->
+            <button class="md:hidden text-gray-600 text-2xl">
+                <i class="ri-menu-line"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="flex-grow">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-gray-100 py-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
+                <div class="col-span-1 md:col-span-2">
+                    <a href="/" class="text-2xl font-bold text-blue-600 flex items-center gap-2 mb-4">
+                        <i class="ri-cpu-line"></i>
+                        <span>CryptoMiner ERP</span>
+                    </a>
+                    <p class="text-gray-500 max-w-sm">The most secure and reliable platform for cryptocurrency mining investments. Start earning daily passive income today.</p>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-4">Quick Links</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="/" class="hover:text-blue-600">Home</a></li>
+                        <li><a href="/miners" class="hover:text-blue-600">Miners</a></li>
+                        <li><a href="/register" class="hover:text-blue-600">Register</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="font-bold text-gray-900 mb-4">Support</h4>
+                    <ul class="space-y-2 text-gray-600">
+                        <li><a href="#" class="hover:text-blue-600">Help Center</a></li>
+                        <li><a href="#" class="hover:text-blue-600">Privacy Policy</a></li>
+                        <li><a href="#" class="hover:text-blue-600">Terms of Service</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="border-t border-gray-100 pt-8 text-center text-gray-400 text-sm">
+                &copy; {{ "now"|date("Y") }} CryptoMiner ERP. All rights reserved.
+            </div>
+        </div>
+    </footer>
+</body>
+</html>
