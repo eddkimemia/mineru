@@ -1,5 +1,18 @@
 {
+    "name": "app/cryptominer-erp",
+    "description": "Modern CryptoMiner ERP",
+    "type": "project",
     "require": {
-        "phpmailer/phpmailer": "^6.10"
+        "php": ">=7.4",
+        "vlucas/phpdotenv": "^5.6",
+        "twig/twig": "^3.0",
+        "monolog/monolog": "^3.0",
+        "phpmailer/phpmailer": "^6.10",
+        "bramus/router": "^1.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "src/"
+        }
     }
 }

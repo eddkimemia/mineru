@@ -1,0 +1,61 @@
+{% extends "layout.twig" %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold mb-6">Mining Packages</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-6 mb-12">
+        {% for package in packages %}
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden border {% if package.is_popular %}border-blue-500 ring-2 ring-blue-200{% endif %}">
+            <div class="p-6">
+                {% if package.is_popular %}
+                <span class="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase mb-4 inline-block">Popular</span>
+                {% endif %}
+                <h3 class="text-xl font-bold mb-2">{{ package.name }}</h3>
+                <p class="text-3xl font-bold text-gray-900 mb-4">${{ package.price|number_format(0) }}</p>
+                <ul class="text-sm text-gray-600 space-y-2 mb-6">
+                    <li>Daily Profit: ${{ package.daily_profit|number_format(2) }}</li>
+                    <li>Return: {{ package.daily_return_percentage }}% Daily</li>
+                    <li>Duration: {{ package.duration_days }} Days</li>
+                </ul>
+                <form action="/miners/purchase" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+                    <input type="hidden" name="package_id" value="{{ package.id }}">
+                    <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700 transition">Buy Now</button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <h2 class="text-2xl font-bold mb-4">Your Active Miners</h2>
+    <div class="bg-white rounded-lg shadow overflow-hidden">
+        <table class="min-w-full divide-y divide-gray-200">
+            <thead class="bg-gray-50">
+                <tr>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Miner</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Daily Profit</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Days Left</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                </tr>
+            </thead>
+            <tbody class="bg-white divide-y divide-gray-200">
+                {% for miner in user_miners %}
+                <tr>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ miner.name }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-green-600 font-bold">${{ miner.daily_profit|number_format(2) }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">{{ miner.days_remaining }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Active</span>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="4" class="px-6 py-4 text-center text-gray-500">You don't have any active miners.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
