@@ -13,6 +13,8 @@ class Transaction extends Model
 
     public function getAll($limit = 50, $offset = 0)
     {
+        $limit = (int)$limit;
+        $offset = (int)$offset;
         return $this->db->query("SELECT t.*, u.username FROM transactions t JOIN users u ON t.user_id = u.id ORDER BY t.created_at DESC LIMIT $limit OFFSET $offset")->fetchAll();
     }
 

@@ -13,11 +13,14 @@ class WalletController extends Controller
     private $balanceModel;
     private $transactionModel;
 
+    protected $db;
+
     public function __construct()
     {
         if (!Session::has('user_id')) {
             $this->redirect('/login');
         }
+        $this->db = \App\Core\Database::getInstance();
         $this->balanceModel = new Balance();
         $this->transactionModel = new Transaction();
     }

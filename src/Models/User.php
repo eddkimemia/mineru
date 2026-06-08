@@ -14,6 +14,8 @@ class User extends Model
 
     public function getAll($limit = 50, $offset = 0)
     {
+        $limit = (int)$limit;
+        $offset = (int)$offset;
         return $this->db->query("SELECT * FROM users ORDER BY created_at DESC LIMIT $limit OFFSET $offset")->fetchAll();
     }
 
