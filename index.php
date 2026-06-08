@@ -9,7 +9,7 @@ if (isset($_SESSION['user_id'])) {
 }
 
 // Fetch mining packages
-$stmt = $pdo->query("SELECT package_id, name, price, daily_profit, duration_days, daily_return_percentage FROM mining_packages WHERE is_active = TRUE ORDER BY price ASC");
+$stmt = $pdo->query("SELECT id, name, price, daily_profit, duration_days, daily_return_percentage FROM mining_packages WHERE is_active = TRUE ORDER BY price ASC");
 $mining_packages = $stmt->fetchAll();
 ?>
 <!DOCTYPE html>
