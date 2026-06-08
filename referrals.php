@@ -55,7 +55,7 @@ $referral_count = count($referred_users);
 // Fetch referral transactions
 $stmt = $pdo->prepare("SELECT transaction_id, amount, method, status, transaction_hash, created_at
                        FROM transactions
-                       WHERE id = ? AND type = 'referral'
+                       WHERE user_id = ? AND type = 'referral'
                        ORDER BY created_at DESC LIMIT 5");
 $stmt->execute([$user_id]);
 $referral_transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -63,7 +63,7 @@ $referral_transactions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Calculate total referral earnings
 $stmt = $pdo->prepare("SELECT SUM(amount) as total_earnings
                        FROM transactions
-                       WHERE id = ? AND type = 'referral' AND status = 'completed'");
+                       WHERE user_id = ? AND type = 'referral' AND status = 'completed'");
 $stmt->execute([$user_id]);
 $total_earnings = $stmt->fetch(PDO::FETCH_ASSOC)['total_earnings'] ?? 0.00;
 ?>

@@ -133,7 +133,7 @@ CREATE TABLE IF NOT EXISTS login_activity (
     browser VARCHAR(255) DEFAULT NULL,
     ip_address VARCHAR(45) DEFAULT NULL,
     location VARCHAR(100) DEFAULT NULL,
-    status ENUM('success', 'failed') DEFAULT 'success',
+    status ENUM('success', 'failed', 'active') DEFAULT 'success',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     INDEX idx_user_activity (user_id, created_at)
@@ -155,3 +155,16 @@ CREATE TABLE IF NOT EXISTS contact_messages (
     INDEX idx_user_id (user_id),
     INDEX idx_status (status)
 ) ENGINE=InnoDB;
+
+-- Seed initial data
+-- Default admin: admin / admin123
+INSERT INTO admins (username, email, password_hash) VALUES
+('admin', 'admin@cryptominer.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi');
+
+-- Initial mining packages
+INSERT INTO mining_packages (name, price, daily_profit, daily_return_percentage, duration_days, is_active, is_popular) VALUES
+('Starter Miner', 10.00, 0.90, 9.00, 20, TRUE, FALSE),
+('Basic Miner', 25.00, 2.25, 9.00, 20, TRUE, FALSE),
+('Standard Miner', 50.00, 4.50, 9.00, 20, TRUE, TRUE),
+('Advanced Miner', 75.00, 6.75, 9.00, 20, TRUE, FALSE),
+('Premium Miner', 120.00, 10.80, 9.00, 20, TRUE, FALSE);

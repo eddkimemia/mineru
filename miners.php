@@ -36,7 +36,7 @@ $stmt->execute();
 $mining_packages = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
 // Fetch user miners
-$stmt = $pdo->prepare("SELECT um.miner_id, mp.name, mp.price, mp.daily_profit, um.purchase_date, um.status, um.days_remaining, mp.duration_days FROM user_miners um JOIN mining_packages mp ON um.package_id = mp.id WHERE um.id = ? ORDER BY um.purchase_date DESC");
+$stmt = $pdo->prepare("SELECT um.miner_id, mp.name, mp.price, mp.daily_profit, um.purchase_date, um.status, um.days_remaining, mp.duration_days FROM user_miners um JOIN mining_packages mp ON um.package_id = mp.id WHERE um.user_id = ? ORDER BY um.purchase_date DESC");
 $stmt->execute([$user_id]);
 $user_miners = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -92,7 +92,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['purchase_package'])) 
                     $balance = $stmt->fetch(PDO::FETCH_ASSOC) ?: ['available_balance' => 0.00];
 
                     // Refresh miners list
-                    $stmt = $pdo->prepare("SELECT um.miner_id, mp.name, mp.price, mp.daily_profit, um.purchase_date, um.status, um.days_remaining, mp.duration_days FROM user_miners um JOIN mining_packages mp ON um.package_id = mp.id WHERE um.id = ? ORDER BY um.purchase_date DESC");
+                    $stmt = $pdo->prepare("SELECT um.miner_id, mp.name, mp.price, mp.daily_profit, um.purchase_date, um.status, um.days_remaining, mp.duration_days FROM user_miners um JOIN mining_packages mp ON um.package_id = mp.id WHERE um.user_id = ? ORDER BY um.purchase_date DESC");
                     $stmt->execute([$user_id]);
                     $user_miners = $stmt->fetchAll(PDO::FETCH_ASSOC);
 

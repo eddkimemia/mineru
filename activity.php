@@ -43,7 +43,7 @@ try {
             status,
             created_at
         FROM transactions
-        WHERE id = ?
+        WHERE user_id = ?
         UNION ALL
         SELECT
             'referral' AS source,
