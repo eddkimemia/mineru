@@ -1,3 +1,0 @@
-No syntax errors detected in src/Controllers/AuthController.php
-No syntax errors detected in src/Core/Database.php
-No syntax errors detected in src/Models/User.php
