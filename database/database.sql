@@ -24,8 +24,8 @@ CREATE TABLE IF NOT EXISTS users (
     referral_code VARCHAR(50) UNIQUE NOT NULL,
     referred_by INT DEFAULT NULL,
     account_status ENUM('pending', 'active', 'suspended') DEFAULT 'pending',
-    verification_code VARCHAR(10) DEFAULT NULL,
-    verification_expires_at DATETIME DEFAULT NULL,
+    verification_token VARCHAR(255) DEFAULT NULL,
+    verification_token_expires DATETIME DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     FOREIGN KEY (referred_by) REFERENCES users(id) ON DELETE SET NULL,
@@ -58,6 +58,7 @@ CREATE TABLE IF NOT EXISTS mining_packages (
     duration_days INT NOT NULL,
     is_active BOOLEAN DEFAULT TRUE,
     is_popular BOOLEAN DEFAULT FALSE,
+    description TEXT DEFAULT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_is_active (is_active)
