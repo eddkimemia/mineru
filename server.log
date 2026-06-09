@@ -1,0 +1,22 @@
+[Tue Jun  9 04:10:14 2026] PHP 8.3.6 Development Server (http://localhost:8000) started
+[Tue Jun  9 04:12:39 2026] [::1]:57174 Accepted
+[Tue Jun  9 04:12:39 2026] [::1]:57174 [200]: GET /
+[Tue Jun  9 04:12:39 2026] [::1]:57174 Closing
+[Tue Jun  9 04:12:39 2026] [::1]:57186 Accepted
+[Tue Jun  9 04:12:39 2026] [::1]:57186 [200]: GET /style.css
+[Tue Jun  9 04:12:39 2026] [::1]:57186 Closing
+[Tue Jun  9 04:12:42 2026] [::1]:57192 Accepted
+[Tue Jun  9 04:12:42 2026] [::1]:57192 [200]: GET /register.php
+[Tue Jun  9 04:12:42 2026] [::1]:57192 Closing
+[Tue Jun  9 04:12:44 2026] [::1]:36100 Accepted
+[Tue Jun  9 04:12:44 2026] [::1]:36100 [302]: POST /register.php
+[Tue Jun  9 04:12:44 2026] [::1]:36100 Closing
+[Tue Jun  9 04:12:44 2026] [::1]:36106 Accepted
+[Tue Jun  9 04:12:44 2026] [::1]:36106 [200]: GET /dashboard.php
+[Tue Jun  9 04:12:44 2026] [::1]:36106 Closing
+[Tue Jun  9 04:12:46 2026] [::1]:36122 Accepted
+[Tue Jun  9 04:12:46 2026] [::1]:36122 [200]: GET /deposit.php
+[Tue Jun  9 04:12:46 2026] [::1]:36122 Closing
+[Tue Jun  9 04:12:47 2026] [::1]:36130 Accepted
+[Tue Jun  9 04:12:47 2026] [::1]:36130 [200]: GET /withdraw.php
+[Tue Jun  9 04:12:47 2026] [::1]:36130 Closing

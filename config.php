@@ -1,55 +1,44 @@
 <?php
-// config.php
+/**
+ * config.php - Central configuration for CryptoERP Miner
+ */
 
-// Prevent direct access
-if (!defined('ABSPATH')) {
-    define('ABSPATH', dirname(__FILE__) . '/');
-}
+// Error reporting (disable in production)
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
 
-// Session configuration
-ini_set('session.cookie_httponly', '1');
-ini_set('session.use_strict_mode', '1');
-ini_set('session.sid_length', '48');
-ini_set('session.sid_bits_per_character', '6');
+// Database configuration
+define('DB_PATH', __DIR__ . '/database.db');
 
+// Daraja M-Pesa API Credentials
+define('CONSUMER_KEY', 'your_actual_consumer_key');
+define('CONSUMER_SECRET', 'your_actual_consumer_secret');
+define('PASSKEY', 'your_actual_passkey');
+define('SHORTCODE', '174379'); // Sandbox Shortcode
+define('B2C_SHORTCODE', '600000'); // Sandbox B2C Shortcode
+define('CALLBACK_URL', 'https://yourdomain.com/mpesa-callback.php');
+
+// Application Settings
+define('APP_NAME', 'CryptoERP Miner');
+define('BASE_URL', 'http://localhost:8000'); // Update for production
+
+// Security
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// CSRF token generation
+// CSRF Protection
 if (empty($_SESSION['csrf_token'])) {
     $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
 }
 
-// Database configuration
-define('DB_HOST', 'localhost');
-define('DB_NAME', 'cryptominer_erp');
-define('DB_USER', 'root');
-define('DB_PASS', ''); // Set your password here
-
+/**
+ * PDO Database Connection
+ */
 try {
-    $pdo = new PDO(
-        "mysql:host=" . DB_HOST . ";dbname=" . DB_NAME . ";charset=utf8mb4",
-        DB_USER,
-        DB_PASS,
-        [
-            PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
-            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-            PDO::ATTR_EMULATE_PREPARES => false,
-        ]
-    );
+    $pdo = new PDO("sqlite:" . DB_PATH);
+    $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    $pdo->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_ASSOC);
 } catch (PDOException $e) {
     die("Database connection failed: " . $e->getMessage());
 }
-
-/**
- * Basic CSRF check
- */
-function verify_csrf_token() {
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        if (!isset($_POST['csrf_token']) || $_POST['csrf_token'] !== $_SESSION['csrf_token']) {
-            die('CSRF token validation failed.');
-        }
-    }
-}
-?>
