@@ -1,80 +1,146 @@
 <?php
-require_once 'config.php';
-verify_csrf_token();
-if (isset($_SESSION['user_id'])) { header('Location: dashboard.php'); exit; }
-$error = ''; $success = '';
+require_once 'functions.php';
+
+if (is_logged_in()) {
+    redirect('dashboard.php');
+}
+
+$error = '';
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $full_name = htmlspecialchars($_POST['full_name'] ?? '', ENT_QUOTES, 'UTF-8');
-    $email = filter_input(INPUT_POST, 'email', FILTER_SANITIZE_EMAIL);
-    $password = $_POST['password'] ?? '';
-    $terms = isset($_POST['terms']);
-    if (empty($full_name) || empty($email) || empty($password) || !$terms) {
+    verify_csrf();
+
+    $fullname = sanitize($_POST['fullname']);
+    $email = sanitize($_POST['email']);
+    $phone = sanitize($_POST['phone']);
+    $password = $_POST['password'];
+    $confirm_password = $_POST['confirm_password'];
+    $ref_code = sanitize($_POST['referral_code'] ?? '');
+
+    if (empty($fullname) || empty($email) || empty($phone) || empty($password)) {
         $error = 'All fields are required.';
+    } elseif ($password !== $confirm_password) {
+        $error = 'Passwords do not match.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = 'Invalid email.';
+        $error = 'Invalid email format.';
     } else {
-        $stmt = $pdo->prepare("SELECT COUNT(*) FROM users WHERE email = ?");
-        $stmt->execute([$email]);
-        if ($stmt->fetchColumn() > 0) {
-            $error = 'Email already exists.';
+        // Check if user exists
+        $stmt = $pdo->prepare("SELECT id FROM users WHERE email = ? OR phone = ?");
+        $stmt->execute([$email, $phone]);
+        if ($stmt->fetch()) {
+            $error = 'Email or Phone already registered.';
         } else {
-            $username = strtolower(str_replace(' ', '_', $full_name)) . '_' . rand(100, 999);
+            // Process referral
+            $referred_by = null;
+            if (!empty($ref_code)) {
+                $stmt = $pdo->prepare("SELECT id FROM users WHERE referral_code = ?");
+                $stmt->execute([$ref_code]);
+                $referrer = $stmt->fetch();
+                if ($referrer) {
+                    $referred_by = $referrer['id'];
+                }
+            }
+
+            // Generate referral code
+            $new_ref_code = 'ERP' . strtoupper(bin2hex(random_bytes(3)));
             $password_hash = password_hash($password, PASSWORD_BCRYPT);
-            $token = bin2hex(random_bytes(16));
+
             try {
-                $pdo->beginTransaction();
-                $stmt = $pdo->prepare("INSERT INTO users (username, email, password_hash, full_name, referral_code, account_status, verification_token) VALUES (?, ?, ?, ?, ?, 'pending', ?)");
-                $stmt->execute([$username, $email, $password_hash, $full_name, 'REF' . rand(1000, 9999), $token]);
-                $user_id = $pdo->lastInsertId();
-                $pdo->prepare("INSERT INTO user_balances (user_id) VALUES (?)")->execute([$user_id]);
-                $pdo->commit();
-                $link = "http://" . $_SERVER['HTTP_HOST'] . "/verify_email.php?token=$token";
-                $success = "Registered! Click <a href='$link' class='underline font-bold'>here</a> to verify (Dev Mode).";
-            } catch (Exception $e) { $pdo->rollBack(); $error = 'Registration failed.'; }
+                $stmt = $pdo->prepare("INSERT INTO users (fullname, email, phone, password_hash, referral_code, referred_by) VALUES (?, ?, ?, ?, ?, ?)");
+                $stmt->execute([$fullname, $email, $phone, $password_hash, $new_ref_code, $referred_by]);
+
+                $_SESSION['user_id'] = $pdo->lastInsertId();
+                $_SESSION['role'] = 'user';
+                $_SESSION['fullname'] = $fullname;
+
+                redirect('dashboard.php');
+            } catch (PDOException $e) {
+                $error = 'Registration failed. Please try again.';
+            }
         }
     }
 }
 ?>
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Register - CryptoMiner ERP</title>
-    <script src="https://cdn.tailwindcss.com/3.4.16"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - CryptoERP Miner</title>
+    <script src="https://cdn.tailwindcss.com/"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css">
+    <style>
+        .glass {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
 </head>
-<body class="bg-gray-50 min-h-screen">
-    <?php include 'header.php'; ?>
-    <main class="container mx-auto px-4 py-12 max-w-md">
-        <div class="bg-white p-8 rounded shadow border">
-            <h1 class="text-2xl font-bold mb-6 text-center">Create Account</h1>
-            <?php if($error): ?><div class="mb-4 p-3 bg-red-50 text-red-600 rounded"><?php echo $error; ?></div><?php endif; ?>
-            <?php if($success): ?><div class="mb-4 p-3 bg-green-50 text-green-600 rounded"><?php echo $success; ?></div><?php endif; ?>
-            <?php if(!$success): ?>
-            <form method="POST">
-                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Full Name</label>
-                    <input type="text" name="full_name" required class="w-full border rounded px-3 py-2">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Email</label>
-                    <input type="email" name="email" required class="w-full border rounded px-3 py-2">
-                </div>
-                <div class="mb-4">
-                    <label class="block text-sm font-medium mb-1">Password</label>
-                    <input type="password" name="password" required class="w-full border rounded px-3 py-2">
-                </div>
-                <div class="mb-6">
-                    <label class="flex items-center text-sm">
-                        <input type="checkbox" name="terms" required class="mr-2"> I agree to terms
-                    </label>
-                </div>
-                <button type="submit" class="w-full bg-blue-600 text-white py-2 rounded font-bold hover:bg-blue-700 transition">Sign Up</button>
-            </form>
-            <?php endif; ?>
-            <p class="mt-4 text-center text-sm">Already have an account? <a href="login.php" class="text-blue-600">Login</a></p>
+<body class="bg-slate-900 text-white min-h-screen flex items-center justify-center p-4">
+    <div class="glass p-8 rounded-2xl w-full max-w-md shadow-2xl">
+        <div class="text-center mb-8">
+            <h1 class="text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-500 bg-clip-text text-transparent">CryptoERP Miner</h1>
+            <p class="text-slate-400 mt-2">Create your mining account</p>
         </div>
-    </main>
-    <?php include 'footer.php'; ?>
+
+        <?php if ($error): ?>
+            <div class="bg-red-500/20 border border-red-500/50 text-red-200 p-3 rounded-lg mb-6 text-sm">
+                <?php echo $error; ?>
+            </div>
+        <?php endif; ?>
+
+        <form method="POST" action="" class="space-y-4">
+            <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token']; ?>">
+
+            <div>
+                <label class="block text-sm font-medium mb-1">Full Name</label>
+                <div class="relative">
+                    <i class="ri-user-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" name="fullname" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 focus:ring-2 focus:ring-emerald-500 outline-none transition" placeholder="John Doe">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">Email Address</label>
+                <div class="relative">
+                    <i class="ri-mail-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="email" name="email" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 focus:ring-2 focus:ring-emerald-500 outline-none transition" placeholder="john@example.com">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">Phone Number (M-Pesa)</label>
+                <div class="relative">
+                    <i class="ri-phone-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+                    <input type="text" name="phone" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 pl-10 pr-4 focus:ring-2 focus:ring-emerald-500 outline-none transition" placeholder="254712345678">
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <label class="block text-sm font-medium mb-1">Password</label>
+                    <input type="password" name="password" id="password" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-4 focus:ring-2 focus:ring-emerald-500 outline-none transition">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium mb-1">Confirm</label>
+                    <input type="password" name="confirm_password" id="confirm_password" required class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-4 focus:ring-2 focus:ring-emerald-500 outline-none transition">
+                </div>
+            </div>
+
+            <div>
+                <label class="block text-sm font-medium mb-1">Referral Code (Optional)</label>
+                <input type="text" name="referral_code" class="w-full bg-slate-800/50 border border-slate-700 rounded-lg py-2.5 px-4 focus:ring-2 focus:ring-emerald-500 outline-none transition" placeholder="ERPXXXXXX">
+            </div>
+
+            <button type="submit" class="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:scale-[1.02] active:scale-95 text-white font-bold py-3 rounded-lg transition-all shadow-lg mt-4">
+                Create Account
+            </button>
+        </form>
+
+        <p class="text-center text-slate-400 mt-6 text-sm">
+            Already have an account? <a href="login.php" class="text-emerald-400 hover:underline">Login here</a>
+        </p>
+    </div>
 </body>
 </html>
